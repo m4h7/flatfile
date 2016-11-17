@@ -7,7 +7,7 @@ class TestFlatfile(TestCase):
     def test_all(self):
         md = """
           column a string datetime
-          column b string
+          column b string _ lz4
           column c u32le
           column d u64le
         """

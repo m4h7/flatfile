@@ -1,4 +1,5 @@
 import struct
+import lz4
 
 VALID_TYPES = ['u32le', 'u64le', 'u128le', 'string']
 VALID_COMPRESSION = ['lz4', 'none']
@@ -46,18 +47,23 @@ class Metadata:
                 assert not "unknown type"
 
     def write(self, kv, fobj):
-        append_values = []
+        append_order = []
+        append_values = {}
         for c in self.columns:
             if c.name in kv:
                 if c.type_ == 'string':
                     s = kv[c.name]
                     b = s.encode('utf-8')
-                    append_values.append(b)
+                    if c.compression == 'lz4':
+                        b = lz4.compress(b)
+                    append_order.append(c.name)
+                    append_values[c.name] = b
                     v = len(b)
                 else:
                     v = kv[c.name]
                 fobj.write(c.encode_uint(v))
-        for b in append_values:
+        for k in append_order:
+            b = append_values[k]
             fobj.write(b)
         for k in kv.keys():
             found = False
@@ -89,7 +95,6 @@ class Metadata:
             else:
                 raise Exception('unknown column type')
         buf = f.read(fixed_size)
-        print (fixed_fmt)
         values = struct.unpack(fixed_fmt, buf)
         r = {}
         readlist = []
@@ -97,13 +102,15 @@ class Metadata:
             if c.type_ == 'u32le':
                 r[c.name] = values[i]
             elif c.type_ == 'string':
-                readlist.append((c.name, values[i]))
+                readlist.append((c.name, values[i], c.compression))
             elif c.type_ == 'u64le':
                 r[c.name] = values[i]
             else:
                 raise Exception('unk col type')
-        for col_name, size in readlist:
+        for col_name, size, compression in readlist:
             b = f.read(size)
+            if compression == 'lz4':
+                b = lz4.decompress(b)
             s = b.decode('utf-8')
             r[col_name] = s
         return r

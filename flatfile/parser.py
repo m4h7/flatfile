@@ -16,9 +16,14 @@ def metadata_parse(s):
             name = items[1]
             type_ = items[2]
             meaning = None
+            compression = None
             if len(items) > 3:
                 meaning = items[3]
-            md.add_column(MetadataColumn(name, type_, meaning))
+                if meaning == '_':
+                    meaning = None
+            if len(items) > 4:
+                compression = items[4]
+            md.add_column(MetadataColumn(name, type_, meaning, compression))
         elif items[0] == 'checksum':
             checksum_type = items[1]
             md.set_checksum(checksum_type)

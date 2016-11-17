@@ -12,7 +12,7 @@ class TestTlogHypothesis(unittest.TestCase):
     def test_hypothesis_put_get(self, k, v):
         md = """
           column k string
-          column v string
+          column v string _ lz4
         """
         m = flatfile.metadata_parse(md)
         f = io.BytesIO()
