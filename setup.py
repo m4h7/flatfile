@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='flatfile',
-      version='1.0',
+      version='1.1',
       description='Simple structured binary flatfile reader/writer',
       license='MIT',
       packages=['flatfile'],
