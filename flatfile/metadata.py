@@ -1,5 +1,5 @@
 import struct
-import lz4
+import lz4.frame
 import brotli
 import zlib
 
@@ -117,7 +117,7 @@ class Metadata:
                     s = kv[c.name]
                     b = s.encode('utf-8')
                     if c.compression == 'lz4':
-                        b = lz4.compress(b)
+                        b = lz4.frame.compress(b)
                     elif c.compression == 'brotli':
                         b = brotli.compress(b)
                     elif c.compression == 'zlib':
@@ -207,7 +207,7 @@ class Metadata:
             b = f.read(size)
             checksum = zlib.adler32(b, checksum)
             if compression == 'lz4':
-                b = lz4.decompress(b)
+                b = lz4.frame.decompress(b)
             elif compression == 'brotli':
                 b = brotli.decompress(b)
             elif compression == 'zlib':
