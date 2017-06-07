@@ -1,9 +1,10 @@
 import struct
 import lz4
+import brotli
 import zlib
 
 VALID_TYPES = ['u32le', 'u64le', 'u128le', 'string']
-VALID_COMPRESSION = ['lz4', 'zlib', 'none']
+VALID_COMPRESSION = ['lz4', 'zlib', 'brotli', 'none']
 VALID_CHECKSUM = ['crc32', 'adler32', 'none']
 
 class Metadata:
@@ -117,6 +118,8 @@ class Metadata:
                     b = s.encode('utf-8')
                     if c.compression == 'lz4':
                         b = lz4.compress(b)
+                    elif c.compression == 'brotli':
+                        b = brotli.compress(b)
                     elif c.compression == 'zlib':
                         b = zlib.compress(b, 9)
                     else:
@@ -205,6 +208,8 @@ class Metadata:
             checksum = zlib.adler32(b, checksum)
             if compression == 'lz4':
                 b = lz4.decompress(b)
+            elif compression == 'brotli':
+                b = brotli.decompress(b)
             elif compression == 'zlib':
                 b = zlib.decompress(b)
             s = b.decode('utf-8')
