@@ -3,6 +3,7 @@ from .metadata import Metadata
 
 def metadata_parse(s):
     md = Metadata()
+    reorder = False
     lines = s.splitlines()
     for line in lines:
         cstart = line.find('#')
@@ -27,7 +28,9 @@ def metadata_parse(s):
         elif items[0] == 'checksum':
             checksum_type = items[1]
             md.set_checksum(checksum_type)
+        elif items[0] == 'reorder':
+            reorder = True
         else:
             raise Exception('unknown line {}'.format(line))
-    md.finalize()
+    md.finalize(reorder)
     return md

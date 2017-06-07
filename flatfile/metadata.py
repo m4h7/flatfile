@@ -80,18 +80,23 @@ class Metadata:
             print ('invalid checksum type', checksum_type, VALID_CHECKSUM)
         assert checksum_type in VALID_CHECKSUM
 
-    def finalize(self):
-        nonstrings = []
-        strings = []
+    def finalize(self, reorder):
+        # if 'reorder' is True, put all nonstring columns
+        # before the string columns, DEPRECATED
+        if reorder is True:
+            nonstrings = []
+            strings = []
+            for c in self.columns:
+                if c.type_ == 'string':
+                    strings.append(c)
+                else:
+                    nonstrings.append(c)
+            strings.sort(key=lambda x: x.name)
+            nonstrings.sort(key=lambda x: x.name)
+            self.columns = nonstrings + strings
+
         self.header_bytes = int((len(self.columns) + 7) / 8)
-        for c in self.columns:
-            if c.type_ == 'string':
-                strings.append(c)
-            else:
-                nonstrings.append(c)
-        strings.sort(key=lambda x: x.name)
-        nonstrings.sort(key=lambda x: x.name)
-        self.columns = nonstrings + strings
+
         offset = 0
         for c in self.columns:
             c.offset = offset
